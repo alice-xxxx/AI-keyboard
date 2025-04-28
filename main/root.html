@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Wi-Fi 配置</title>
+    <style>
+        /*  基础样式  */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+            border-radius: 5px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #refreshButton {
+            display: block;
+            width: auto;
+            padding: 10px 20px;
+            margin: 20px auto;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #refreshButton:hover {
+            background-color: #45a049;
+        }
+
+        #wifiList {
+            list-style: none;
+            padding: 0;
+        }
+
+        #wifiList li {
+            margin-bottom: 8px;
+        }
+
+        .wifi-button {
+            background-color: #ffffff;
+            color: black;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .wifi-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .wifi-ssid {
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .wifi-info {
+            width: auto;
+            white-space: nowrap;
+            font-size: 14px;
+            color: #777;
+            margin-left: 10px;
+        }
+
+        .lock-icon {
+            display: inline-block;
+            width: 12px;
+            height: 10px;
+            border-radius: 2px;
+            border: 2px solid #888;
+            position: relative;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+        .lock-icon::before {
+            content: '';
+            display: block;
+            position: absolute;
+            top: -6px;
+            left: 2px;
+            width: 4px;
+            height: 6px;
+            border-radius: 3px 3px 0 0;
+            border-top: 2px solid #888;
+            border-left: 2px solid #888;
+            border-right: 2px solid #888;
+            background-color: #ffffff;
+        }
+
+        #wifiCredentials {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        #wifiCredentials label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        #wifiCredentials input[type="text"],
+        #wifiCredentials input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+
+        #connectButton {
+            display: block;
+            width: auto;
+            padding: 10px 20px;
+            margin: 10px auto;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #connectButton:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Wi-Fi 配置</h1>
+
+    <button id="refreshButton">刷新菜单</button>
+
+    <div id="wifiCredentials">
+        <label for="ssidInput">Wi-Fi 账号 (SSID):</label>
+        <input type="text" id="ssidInput" name="ssid" placeholder="请输入 Wi-Fi 账号" readonly>
+
+        <label for="passwordInput">Wi-Fi 密码:</label>
+        <input type="password" id="passwordInput" name="password" placeholder="请输入 Wi-Fi 密码">
+
+        <button id="connectButton">连接 Wi-Fi</button>
+    </div>
+
+    <ul id="wifiList" data-loading="false">
+        <!-- Wi-Fi 列表项将通过 JavaScript 动态生成 -->
+    </ul>
+
+    <script>
+        window.onload = function() {
+            document.getElementById('refreshButton').click();
+        };
+
+        const menuList = document.getElementById('wifiList');
+        const loadingIndicator = document.createElement('li');
+        loadingIndicator.innerHTML = '<b>加载中，请稍候...</b>';
+
+        document.getElementById('refreshButton').addEventListener('click', function () {
+            menuList.dataset.loading = 'true';
+            menuList.innerHTML = '';
+            menuList.appendChild(loadingIndicator);
+
+            const rawData = "1"
+            fetch('/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                body: rawData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (menuList.dataset.loading === 'true') {
+                    menuList.removeChild(loadingIndicator);
+                    delete menuList.dataset.loading;
+                }
+
+                menuList.innerHTML = '';
+
+                console.log("完整 JSON 数据:", data);
+
+                for (const key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        const jsonDataItem = data[key];
+                        console.log("当前数据项 (jsonDataItem):", jsonDataItem);
+
+                        const listItem = document.createElement('li');
+                        const buttonElement = document.createElement('button');
+                        buttonElement.type = 'button';
+                        buttonElement.className = 'wifi-button';
+                        buttonElement.onclick = function() { setWifiName(this); };
+
+                        const wifiSsidDiv = document.createElement('div');
+                        wifiSsidDiv.className = 'wifi-ssid';
+                        wifiSsidDiv.innerHTML = `<b>${jsonDataItem["1"] || '数据错误'}</b>`;
+
+                        const wifiInfoDiv = document.createElement('div');
+                        wifiInfoDiv.className = 'wifi-info';
+
+                        let rssiText = jsonDataItem["2"] ? `信号强度: ${jsonDataItem["2"]}` : '.';
+                        let authModeIcon = '';
+                        if (jsonDataItem["3"] && jsonDataItem["3"] !== '0') {
+                            authModeIcon = '<span class="lock-icon"></span>';
+                        }
+
+                        wifiInfoDiv.innerHTML = `${rssiText} ${authModeIcon}`;
+
+                        buttonElement.appendChild(wifiSsidDiv);
+                        buttonElement.appendChild(wifiInfoDiv);
+                        listItem.appendChild(buttonElement);
+                        menuList.appendChild(listItem);
+                        console.log("已添加列表项:", listItem);
+                        console.log("当前 wifiList 的 innerHTML:", menuList.innerHTML);
+                    }
+                }
+
+            })
+            .catch(error => {
+                if (menuList.dataset.loading === 'true') {
+                    menuList.removeChild(loadingIndicator);
+                    delete menuList.dataset.loading;
+                }
+                menuList.innerHTML = `<li><b>请求数据失败，请检查网络连接。<br>${error.message}</b></li>`;
+            });
+        });
+
+        function setWifiName(buttonElement) {
+            const ssid = buttonElement.querySelector('.wifi-ssid b').textContent;
+            console.log("选中 Wi-Fi:", ssid);
+
+            const ssidInput = document.getElementById('ssidInput');
+            ssidInput.value = ssid;
+            ssidInput.removeAttribute('readonly');
+        }
+
+        document.getElementById('connectButton').addEventListener('click', function() {
+            const ssid = document.getElementById('ssidInput').value;
+            const password = document.getElementById('passwordInput').value;
+
+            if (!ssid) {
+                alert("请先选择 Wi-Fi 网络或手动输入 Wi-Fi 账号 (SSID)。");
+                return;
+            }
+
+            if (!password) {
+                alert("请输入 Wi-Fi 密码。");
+                return;
+            }
+
+            const rawData = `userid=${ssid}\npassword=${password}\n`;
+            fetch('/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                body: rawData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Wi-Fi 连接成功！");
+                } else {
+                    alert(`Wi-Fi 连接失败: ${data.message || '未知错误'}`);
+                }
+            })
+            .catch(error => {
+                alert(`连接 Wi-Fi 失败，请检查网络连接: ${error.message}`);
+            });
+        });
+
+    </script>
+</body>
+</html>

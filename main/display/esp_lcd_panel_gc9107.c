@@ -1,0 +1,42 @@
+#include "esp_lcd_gc9a01.h"
+
+
+static const gc9a01_lcd_init_cmd_t lcd_init_cmds[] = {
+    //  {cmd, { data }, data_size, delay_ms}
+    {0xfe, (uint8_t[]) { 0x00 }, 0, 0},
+    {0xef, (uint8_t[]) { 0x00 }, 0, 0},
+    {0xb0, (uint8_t[]) { 0xc0 }, 1, 0},
+    {0xb2, (uint8_t[]) { 0x2f }, 1, 0},
+    {0xb3, (uint8_t[]) { 0x03 }, 1, 0},
+    {0xb6, (uint8_t[]) { 0x19 }, 1, 0},
+    {0xb7, (uint8_t[]) { 0x01 }, 1, 0},
+    {0xac, (uint8_t[]) { 0xcb }, 1, 0},
+    {0xab, (uint8_t[]) { 0x0e }, 1, 0},
+    {0xb4, (uint8_t[]) { 0x04 }, 1, 0},
+    {0xa8, (uint8_t[]) { 0x19 }, 1, 0},
+    {0xb8, (uint8_t[]) { 0x08 }, 1, 0},
+    {0xe8, (uint8_t[]) { 0x24 }, 1, 0},
+    {0xe9, (uint8_t[]) { 0x48 }, 1, 0},
+    {0xea, (uint8_t[]) { 0x22 }, 1, 0},
+    {0xc6, (uint8_t[]) { 0x30 }, 1, 0},
+    {0xc7, (uint8_t[]) { 0x18 }, 1, 0},
+    {0xf0,
+     (uint8_t[])
+{
+0x1f, 0x28, 0x04, 0x3e, 0x2a, 0x2e, 0x20, 0x00, 0x0c, 0x06,
+                0x00, 0x1c, 0x1f, 0x0f
+},
+14, 0},
+{0xf1,
+ (uint8_t[])
+{
+0x00, 0x2d, 0x2f, 0x3c, 0x6f, 0x1c, 0x0b, 0x00, 0x00, 0x00,
+                0x07, 0x0d, 0x11, 0x0f
+},
+14, 0},
+};
+
+gc9a01_vendor_config_t gc9107_vendor_config = {
+    .init_cmds = lcd_init_cmds,
+    .init_cmds_size = sizeof(lcd_init_cmds) / sizeof(gc9a01_lcd_init_cmd_t),
+};
